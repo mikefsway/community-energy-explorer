@@ -88,6 +88,7 @@ const map = new maplibregl.Map({
   minZoom: 5,
   maxZoom: 15,
   attributionControl: { compact: true },
+  preserveDrawingBuffer: true,
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 

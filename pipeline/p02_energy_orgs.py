@@ -134,6 +134,32 @@ def ceemap_projects():
     return out
 
 
+def cc_orgs():
+    """Energy-named community charities (produced by stage 3, if it has run)."""
+    path = PROCESSED / "cc_energy_orgs.csv"
+    if not path.exists():
+        print("  Charity Commission: cc_energy_orgs.csv not present yet (run stage 3)")
+        return []
+    df = pd.read_csv(path, dtype=str)
+    out = []
+    for _, r in df.iterrows():
+        try:
+            lat, lon = float(r["lat"]), float(r["long"])
+        except (TypeError, ValueError):
+            continue
+        out.append({
+            "name": str(r["charity_name"]).strip().title(),
+            "norm": norm_name(r["charity_name"]),
+            "src": "charity",
+            "kind": "registered charity",
+            "pc": str(r.get("pc") or ""),
+            "lsoa": str(r.get("lsoa") or ""),
+            "lat": lat, "lon": lon, "url": "",
+        })
+    print(f"  Charity Commission: {len(out)} energy charities")
+    return out
+
+
 def in_england_bbox(o):
     return 49.8 <= o["lat"] <= 55.9 and -6.5 <= o["lon"] <= 2.0
 
@@ -143,11 +169,14 @@ def main():
     fca = fca_orgs(pclookup)
     cee = cee_orgs()
     proj = ceemap_projects()
+    cc = cc_orgs()
 
     # merge: CEE member entries enrich/absorb FCA rows with same normalised name
     by_norm = {}
     for o in fca:
         by_norm[o["norm"]] = o
+    for o in cc:
+        by_norm.setdefault(o["norm"], o)
     for o in cee:
         if o["norm"] in by_norm:
             base = by_norm[o["norm"]]
