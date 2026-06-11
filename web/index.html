@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community Energy Explorer — England</title>
+<meta name="description" content="Explore community energy organisations, deprivation, community infrastructure and grid capacity across England.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,900&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="panel">
+    <header class="panel-head">
+      <div class="kicker">England · small-area view</div>
+      <h1>Community <em>Energy</em> Explorer</h1>
+      <p class="standfirst">Where community energy is already happening, where the social
+      fabric could support it, and where it would matter most.</p>
+    </header>
+
+    <section class="control-block" id="metric-block">
+      <h2>Colour areas by</h2>
+      <div class="metric-tabs" role="tablist" id="metric-tabs">
+        <button class="metric-tab active" data-metric="imd" role="tab">Deprivation</button>
+        <button class="metric-tab" data-metric="infra" role="tab">Community fabric</button>
+        <button class="metric-tab" data-metric="comp" role="tab">Need × readiness</button>
+      </div>
+      <p class="metric-note" id="metric-note"></p>
+      <div id="legend"></div>
+    </section>
+
+    <section class="control-block">
+      <h2>Layers</h2>
+      <label class="layer-toggle"><input type="checkbox" id="tgl-orgs" checked>
+        <span class="swatch sw-org"></span>Community energy organisations
+        <span class="count" id="count-orgs"></span></label>
+      <label class="layer-toggle"><input type="checkbox" id="tgl-infra">
+        <span class="swatch sw-infra"></span>Community venues (halls &amp; centres)
+        <span class="count" id="count-infra"></span></label>
+      <label class="layer-toggle"><input type="checkbox" id="tgl-grid">
+        <span class="swatch sw-grid"></span>Grid headroom (primary substations)
+        <span class="count" id="count-grid"></span></label>
+      <label class="layer-toggle"><input type="checkbox" id="tgl-dno">
+        <span class="swatch sw-dno"></span>Network operator (DNO) boundaries</label>
+    </section>
+
+    <section class="control-block" id="detail-block">
+      <h2>Selected area</h2>
+      <div id="detail" class="detail-empty">Click an area on the map.</div>
+    </section>
+
+    <footer class="panel-foot">
+      <button id="about-btn" class="link-btn">About the data &amp; method</button>
+      <div class="attribution">IMD (MHCLG) · ONS boundaries · Community Energy England ·
+      FCA Mutuals Register · Charity Commission · OpenStreetMap · DNO open data · OGL v3</div>
+    </footer>
+  </aside>
+
+  <main id="map-wrap">
+    <div id="map"></div>
+    <div id="search-box">
+      <input id="search" type="text" placeholder="Postcode or place…" autocomplete="off" spellcheck="false">
+      <div id="search-results"></div>
+    </div>
+    <div id="zoom-hint">Zoom in for neighbourhood (LSOA) detail</div>
+  </main>
+</div>
+
+<div id="about-modal" class="modal hidden">
+  <div class="modal-card">
+    <button class="modal-close" id="about-close">×</button>
+    <h2>About this map</h2>
+    <div id="about-body">
+      <p>This tool overlays four things for England:</p>
+      <ul>
+        <li><strong>Need</strong> — the English Indices of Deprivation at neighbourhood
+        (LSOA) level. More deprived places stand to gain most from lower bills and local
+        energy income.</li>
+        <li><strong>Existing community energy</strong> — organisations assembled from the
+        Community Energy England member directory, energy-named registered societies on the
+        FCA Mutuals Register, and energy-focused charities, geocoded to their registered
+        location.</li>
+        <li><strong>Community fabric</strong> — proxies for local civic capacity:
+        registered charities per resident and community venues (village halls, community
+        centres) from OpenStreetMap.</li>
+        <li><strong>Grid capacity</strong> — primary-substation headroom published by the
+        Distribution Network Operators, shown as red/amber/green.</li>
+      </ul>
+      <p>The <strong>Need × readiness</strong> view crosses deprivation (need) with
+      community fabric and existing organisations (readiness): dark red areas are high-need
+      but thin on civic infrastructure (support must be built, not just funded); dark teal
+      areas have strong fabric and lower need; the deep purple corner — high need
+      <em>and</em> strong fabric — is where community energy could take root fastest and
+      matter most.</p>
+      <p class="small">Caveats: organisation locations are registered offices, which may
+      differ from where projects operate. Community fabric proxies are partial — they miss
+      informal networks. Grid headroom is indicative; always check the DNO's own capacity
+      map. Sources and method: see the <a href="https://github.com/mikefsway/community-energy-explorer" target="_blank" rel="noopener">repository</a>.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
