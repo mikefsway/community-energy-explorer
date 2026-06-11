@@ -31,7 +31,7 @@ where it would be most beneficial.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt
-.venv/bin/python pipeline/run_all.py        # or run individual steps, see pipeline/README.md
+.venv/bin/python pipeline/run_all.py        # stages: p01, p03, p02, p04, p05
 ```
 
 ## Licences
