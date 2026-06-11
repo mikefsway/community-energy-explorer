@@ -31,6 +31,37 @@ All sources are open data, fetched directly by the pipeline. Verified June 2026.
 Caveats: registered office ≠ project location; CICs and companies limited by guarantee
 appear only via CEE/charity sources; the project-site extract is ~2 years stale.
 
+In the web app, organisations (FCA / CEE / charity sources) and project sites
+(CEE map extract, `src=cee-map`) are separate toggleable layers.
+
+## Energy Redress funded projects
+- **Energy Industry Voluntary Redress Scheme** (Ofgem; administered by Energy Saving
+  Trust). The full funded-projects list is scraped from two public pages:
+  the paginated Drupal view at https://energyredress.org.uk/funded-projects
+  (phase, round, grantee + website, country/region, grant value, project name,
+  description — scraped per phase/round filter term because the unfiltered view's
+  ordering drifts between page requests) and the static Phase-1 round tables at
+  https://energyredress.org.uk/projects (which add town-level locations). The two
+  are unioned and deduplicated on (organisation, round, amount, project name).
+- Geocoding: stated project town via postcodes.io `/places` where known
+  (`loc=area`), otherwise grantee name matched against the Charity Commission /
+  FCA registers → registered-office postcode (`loc=office`). Projects located in
+  Scotland, Wales or NI are excluded. Grantees that are CICs, councils or housing
+  associations without a register match cannot be geocoded and are dropped —
+  roughly a third of England-eligible rows; treat the layer as indicative, not a
+  complete census.
+
+## Energy knowledge bases
+- **UKRI Gateway to Research API** (https://gtr.ukri.org/gtr/api) — projects whose
+  research-topic field matches energy terms (Energy, Solar Technology, Wind Power,
+  Bioenergy, Fuel Cell, Carbon Capture, Hydrogen), aggregated by lead organisation
+  (total + active counts), geocoded via the organisation record's postcode.
+  Organisations with fewer than 3 energy projects are dropped. Licence: OGL.
+- **Curated sector anchors** (`pipeline/knowledge_anchors.csv`) — DNO head offices,
+  NESO, National Grid, Ofgem, Energy Systems Catapult, UKERC, community-energy
+  intermediaries (CSE, NEA, CEE, Regen) and major supplier HQs. Hand-maintained;
+  locations are indicative head-office postcodes.
+
 ## Community infrastructure
 - **Charity Commission register of charities bulk extract** — registered main charities
   per LSOA via contact postcode. Licence: OGL.

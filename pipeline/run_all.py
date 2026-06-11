@@ -8,7 +8,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 STAGES = ["p01_imd_boundaries.py", "p03_infra.py", "p02_energy_orgs.py",
-          "p04_grid.py", "p05_composite.py"]
+          "p04_grid.py", "p05_composite.py", "p06_redress.py", "p07_knowledge.py"]
 
 for stage in STAGES:
     print(f"\n=== {stage} ===")

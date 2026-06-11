@@ -1,0 +1,22 @@
+name,kind,pc,url,note
+Northern Powergrid (HQ),dno,NE1 6AF,https://www.northernpowergrid.com,Distribution network operator for the North East and Yorkshire
+UK Power Networks (HQ),dno,SE1 6NP,https://www.ukpowernetworks.co.uk,Distribution network operator for London and the South East
+National Grid Electricity Distribution (HQ),dno,BS2 0TB,https://www.nationalgrid.co.uk,Distribution network operator for the Midlands and South West
+Electricity North West (HQ),dno,SK1 2JD,https://www.enwl.co.uk,Distribution network operator for the North West
+SSEN Distribution (southern HQ),dno,RG1 8BU,https://www.ssen.co.uk,Distribution network operator for central southern England
+National Energy System Operator (NESO),system,RG41 5BN,https://www.neso.energy,GB electricity system operator
+National Grid (Warwick campus),system,CV34 6DA,https://www.nationalgrid.com,Transmission owner head office
+Energy Systems Catapult,research,B4 6BS,https://es.catapult.org.uk,Whole-energy-system innovation centre
+UK Energy Research Centre (UKERC),research,WC1H 0NN,https://ukerc.ac.uk,National energy research hub (hosted at UCL)
+Ofgem,agency,E14 4PU,https://www.ofgem.gov.uk,GB energy regulator
+Centre for Sustainable Energy,intermediary,BS3 4AQ,https://www.cse.org.uk,Energy advice and community energy support charity
+National Energy Action,intermediary,NE1 3PA,https://www.nea.org.uk,Fuel poverty charity
+Community Energy England,intermediary,S1 2BX,https://communityenergyengland.org,Community energy sector body
+Regen,intermediary,EX4 3PL,https://www.regen.co.uk,Clean energy not-for-profit and community energy network
+Octopus Energy (HQ),supplier,W1D 1NN,https://octopus.energy,Energy supplier
+Centrica / British Gas (HQ),supplier,SL4 5GD,https://www.centrica.com,Energy supplier group
+E.ON UK (HQ),supplier,CV4 8LG,https://www.eonenergy.com,Energy supplier
+EDF Energy (HQ),supplier,W1T 4EZ,https://www.edfenergy.com,Energy supplier and generator
+OVO Energy (HQ),supplier,BS1 6ED,https://www.ovoenergy.com,Energy supplier
+Good Energy (HQ),supplier,SN15 1EE,https://www.goodenergy.co.uk,Renewable energy supplier
+Ecotricity (HQ),supplier,GL5 3BY,https://www.ecotricity.co.uk,Renewable energy supplier

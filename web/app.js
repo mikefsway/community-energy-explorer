@@ -3,7 +3,9 @@
  *   meta.json          {generated, counts:{orgs,infra,grid}}
  *   lad.geojson        England LADs: code,name,imd_s,imd_q(1-5),inf_q(1-5),cmp(1-9),orgs,inf,pop,pct12
  *   lsoa/<LAD>.json    LSOA FeatureCollections: c,n,d(1-10),r,s,iq(1-5),org,inf,cmp(1-9),pop
- *   orgs.geojson       points: name,src,kind,pc,lad,url
+ *   orgs.geojson       points: name,src,kind,pc,lad,url (src=cee-map → project site)
+ *   redress.geojson    points: name,n,total,projects,url,loc(area|office)
+ *   knowledge.geojson  points: name,kind,n,active | name,kind,url,note (anchors)
  *   infra.geojson      points: name,kind
  *   grid.geojson       points: name,dno,dh,gh,rag(r|a|g)
  *   dno.geojson        polygons: name
@@ -166,9 +168,51 @@ async function init() {
     });
   }, "count-infra");
 
-  await addOptionalLayer("orgs", "orgs.geojson", src => {
+  await addOptionalLayer("redress", "redress.geojson", src => {
     map.addLayer({
-      id: "orgs-glow", type: "circle", source: src,
+      id: "redress-pts", type: "circle", source: src,
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": "#7d4fb3",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.8, 10, 6],
+        "circle-stroke-color": "#fffdf8",
+        "circle-stroke-width": 0.9,
+        "circle-opacity": 0.9,
+      },
+    });
+  }, "count-redress");
+
+  await addOptionalLayer("knowledge", "knowledge.geojson", src => {
+    map.addLayer({
+      id: "knowledge-pts", type: "circle", source: src,
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": ["match", ["get", "kind"],
+          "university", "#2d5fa6", "industry", "#5e83b8", "#15355f"],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"],
+          5, ["+", 2.5, ["*", 0.35, ["sqrt", ["min", ["coalesce", ["get", "n"], 9], 330]]]],
+          10, ["+", 5, ["*", 0.55, ["sqrt", ["min", ["coalesce", ["get", "n"], 9], 330]]]]],
+        "circle-stroke-color": "#fffdf8",
+        "circle-stroke-width": 0.9,
+        "circle-opacity": 0.85,
+      },
+    });
+  }, "count-knowledge");
+
+  const isProj = ["==", ["get", "src"], "cee-map"];
+  const orgsData = await addOptionalLayer("orgs", "orgs.geojson", src => {
+    map.addLayer({
+      id: "proj-pts", type: "circle", source: src, filter: isProj,
+      paint: {
+        "circle-color": "#2e7d5b",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.4, 10, 5.5],
+        "circle-stroke-color": "#fffdf8",
+        "circle-stroke-width": 0.8,
+        "circle-opacity": 0.9,
+      },
+    });
+    map.addLayer({
+      id: "orgs-glow", type: "circle", source: src, filter: ["!", isProj],
       paint: {
         "circle-color": "#e8a013",
         "circle-opacity": 0.25,
@@ -176,7 +220,7 @@ async function init() {
       },
     });
     map.addLayer({
-      id: "orgs-pts", type: "circle", source: src,
+      id: "orgs-pts", type: "circle", source: src, filter: ["!", isProj],
       paint: {
         "circle-color": "#e8a013",
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 3, 10, 6.5],
@@ -185,6 +229,11 @@ async function init() {
       },
     });
   }, "count-orgs");
+  if (orgsData) {
+    const nProj = orgsData.features.filter(f => f.properties.src === "cee-map").length;
+    document.getElementById("count-orgs").textContent = fmt(orgsData.features.length - nProj);
+    document.getElementById("count-proj").textContent = fmt(nProj);
+  }
 
   // raster labels above everything polygonal
   map.addLayer({ id: "labels", type: "raster", source: "labels", paint: { "raster-opacity": 0.9 } });
@@ -217,6 +266,7 @@ async function addOptionalLayer(name, file, addFn, countElId) {
   map.addSource(name, { type: "geojson", data });
   addFn(name);
   if (countElId) document.getElementById(countElId).textContent = fmt(data.features.length);
+  return data;
 }
 
 /* ---- on-demand LSOA loading ---- */
@@ -254,12 +304,41 @@ function wireInteractions() {
   const popup = (e, html) => new maplibregl.Popup({ closeButton: false })
     .setLngLat(e.lngLat).setHTML(html).addTo(map);
 
-  map.on("click", "orgs-pts", e => {
+  const orgPopup = e => {
     const p = e.features[0].properties;
+    const srcLabel = { "cee-map": "project site", fca: "FCA register", cee: "CEE member",
+                       "fca+cee": "FCA + CEE", charity: "charity" }[p.src] || p.src;
     popup(e, `<h4>${esc(p.name)}</h4>
       ${(p.kind ? `<span class="tag">${esc(p.kind)}</span>` : "")}
-      <span class="tag">${esc(p.src || "")}</span>
+      <span class="tag">${esc(srcLabel || "")}</span>
       <p>${p.pc ? esc(p.pc) + " · " : ""}${esc(p.lad || "")}</p>
+      ${p.url ? `<p><a href="${esc(p.url)}" target="_blank" rel="noopener">website</a></p>` : ""}`);
+    e.preventDefault();
+  };
+  map.on("click", "orgs-pts", orgPopup);
+  map.on("click", "proj-pts", orgPopup);
+
+  map.on("click", "redress-pts", e => {
+    const p = e.features[0].properties;
+    popup(e, `<h4>${esc(p.name)}</h4>
+      <span class="tag">Energy Redress grantee</span>
+      <span class="tag">${p.loc === "area" ? "project area" : "registered office"}</span>
+      <p>${p.n || 1} funded project${p.n > 1 ? "s" : ""}${p.total ? " · £" + fmt(+p.total) : ""}</p>
+      ${p.projects ? `<p>${esc(p.projects)}</p>` : ""}
+      ${p.url ? `<p><a href="${esc(p.url)}" target="_blank" rel="noopener">website</a></p>` : ""}`);
+    e.preventDefault();
+  });
+
+  map.on("click", "knowledge-pts", e => {
+    const p = e.features[0].properties;
+    const kindLabel = { university: "University energy research", industry: "Industry energy R&D",
+                        dno: "Network operator HQ", system: "System operator",
+                        research: "Research centre", agency: "Regulator",
+                        intermediary: "Sector intermediary", supplier: "Supplier HQ" }[p.kind] || p.kind;
+    popup(e, `<h4>${esc(p.name)}</h4>
+      <span class="tag">${esc(kindLabel)}</span>
+      ${p.n ? `<p>${fmt(+p.n)} UKRI energy research projects · ${fmt(+p.active || 0)} active</p>` : ""}
+      ${p.note ? `<p>${esc(p.note)}</p>` : ""}
       ${p.url ? `<p><a href="${esc(p.url)}" target="_blank" rel="noopener">website</a></p>` : ""}`);
     e.preventDefault();
   });
@@ -331,7 +410,9 @@ function wireUi() {
   });
   setMetric("imd");
 
-  const toggles = { orgs: ["orgs-pts", "orgs-glow"], infra: ["infra-pts"], grid: ["grid-pts"], dno: ["dno-line"] };
+  const toggles = { orgs: ["orgs-pts", "orgs-glow"], proj: ["proj-pts"],
+                    redress: ["redress-pts"], knowledge: ["knowledge-pts"],
+                    infra: ["infra-pts"], grid: ["grid-pts"], dno: ["dno-line"] };
   for (const [name, layers] of Object.entries(toggles)) {
     const el = document.getElementById("tgl-" + name);
     el.addEventListener("change", () => {

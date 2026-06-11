@@ -146,6 +146,9 @@ body {
   flex-shrink: 0;
 }
 .sw-org   { background: var(--amber); }
+.sw-proj  { background: var(--green-bright); }
+.sw-redress { background: #7d4fb3; }
+.sw-knowledge { background: #2d5fa6; }
 .sw-infra { background: var(--teal); border-radius: 3px; }
 .sw-grid  { background: linear-gradient(90deg,#2e9e5b 33%,#e8a013 33% 66%,#cb4b3a 66%); }
 .sw-dno   { background: transparent; border: 2px dashed var(--ink-soft); border-radius: 2px; }

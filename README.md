@@ -16,6 +16,9 @@ where it would be most beneficial.
 |---|---|---|
 | Deprivation (IMD) | MHCLG English Indices of Deprivation | LSOA |
 | Community energy organisations | Community Energy England directory, FCA Mutuals Register, Charity Commission | point (geocoded) |
+| Community energy project sites | CEE national map extract (2024) | point |
+| Energy Redress funded projects | Ofgem Energy Redress Scheme (Energy Saving Trust) | point (geocoded) |
+| Energy knowledge bases | UKRI Gateway to Research + curated sector anchors (DNO HQs, NESO, Ofgem, catapults, intermediaries, supplier HQs) | point |
 | Community infrastructure | Charity Commission register density, OSM community centres / village halls | LSOA / point |
 | Grid capacity | DNO open data portals (primary substation headroom), DNO licence areas | point / polygon |
 | Need vs readiness composite | derived | LSOA + LAD |
@@ -31,7 +34,7 @@ where it would be most beneficial.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt
-.venv/bin/python pipeline/run_all.py        # stages: p01, p03, p02, p04, p05
+.venv/bin/python pipeline/run_all.py        # stages: p01, p03, p02, p04, p05, p06, p07
 ```
 
 ## Licences

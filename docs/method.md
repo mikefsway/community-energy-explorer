@@ -43,3 +43,7 @@ Interpretation for "where on the journey":
   values are indicative snapshots, not connection offers.
 - Weights (0.75/0.25) are judgement calls; the pipeline makes them easy to change in
   `p05_composite.py`.
+- The Energy Redress and energy knowledge-base layers are visual overlays only — they
+  do not feed the readiness score. Redress geocoding drops grantees absent from the
+  charity/FCA registers (~⅓ of England rows), so absence of a point is weak evidence
+  of absence of activity.
