@@ -44,9 +44,10 @@ Interpretation for "where on the journey":
 - Weights (0.75/0.25) are judgement calls; the pipeline makes them easy to change in
   `p05_composite.py`.
 - The Energy Redress and energy knowledge-base layers are visual overlays only — they
-  do not feed the readiness score. Redress geocoding drops grantees absent from the
-  charity/FCA registers (~⅓ of England rows), so absence of a point is weak evidence
-  of absence of activity.
+  do not feed the readiness score. Redress projects are placed at the local authority
+  named in the project text where possible, else the grantee's registered office;
+  projects with no recognised place and no register match are still dropped, so
+  absence of a point is weak evidence of absence of activity.
 
 ## Data explorer (LAD-level)
 
@@ -76,5 +77,6 @@ Derived from these:
 
 Installed capacity is parsed from the CEE-map `kind` field (e.g. `Solar · 24 kW`). Not
 every scheme records a size and the extract is 2024 vintage, so capacity totals are a
-floor, not a census. Like the map, organisation and redress locations are registered
-offices or stated project towns and may differ from where work actually happens.
+floor, not a census. Like the map, organisation and redress locations are the named
+local authority, a stated project town, or a registered office, and may differ from
+where work actually happens.

@@ -1,26 +1,36 @@
 """Stage 6: Energy Redress Scheme funded projects.
 
 The Energy Industry Voluntary Redress Scheme (Ofgem, administered by Energy Saving
-Trust) lists all funded projects in a paginated Drupal view at /funded-projects
-(phase, round, charity + website, country/region, grant award, project name,
-description). Phase 1 rounds also appear as static tables on /projects with
-town-level locations, used to refine those points.
+Trust) lists all funded projects in a Drupal view at /funded-projects (phase, round,
+charity + website, country/region, grant award, project name, description). The
+view's default pager drifts between requests — rows repeat and others are missed,
+and some published project nodes never surface at all — so a plain page crawl is
+lossy. Instead we enumerate the view's `field_charity_target_id` exposed filter
+(one term per grantee, ~300) and crawl each charity's own small, stable subset;
+the union is every funded project. Phase 1 rounds also appear as static tables on
+/projects with town-level locations, used to refine those points.
 
 Geocoding, in order of preference:
   1. Phase-1 town location -> postcodes.io /places (England gazetteer) -> loc="area"
-  2. grantee name matched against the Charity Commission extract or FCA Mutuals
+  2. project text (title/grantee/description) naming exactly one English local
+     authority -> that LAD's centroid -> loc="area". Names in the title or grantee
+     name are trusted even when ambiguous ("Reading"); in free-text description,
+     LAD names that are also common words are ignored.
+  3. grantee name matched against the Charity Commission extract or FCA Mutuals
      Register -> registered-office postcode -> loc="office"
 Projects located in Scotland/Wales/NI are excluded; England-region or UK-wide
-projects keep their office point.
+projects keep their best available point.
 
 Output: web/data/redress.geojson, data/processed/redress_projects.csv (cache)
 """
 import io
+import json
 import re
 import time
 import zipfile
 from html import unescape
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -43,47 +53,42 @@ def strip_tags(s):
 
 
 def scrape_listing():
-    """Scrape the funded-projects view per phase/round term.
+    """Scrape the funded-projects view per grantee (charity) term.
 
-    The unfiltered view's ordering drifts between page requests, so rows repeat
-    and others are missed. Filtering by each phase/round term id keeps every
-    subset to a handful of stable pages; rows are deduped across subsets.
+    The view's default pager drifts between page requests, so rows repeat, others
+    are missed, and some published nodes never appear under any phase filter.
+    The exposed `field_charity_target_id` filter lists every grantee as its own
+    term; each charity's filtered subset is one or two stable pages, and their
+    union is the complete project list. The term label is the canonical charity
+    name (cleaner than the per-row link text), carried through as ``org``.
     """
     r0 = requests.get(LIST_URL, headers=UA, timeout=60)
     r0.raise_for_status()
-    tids = sorted({m for m in re.findall(r'name="field_phase\[(\d+)\]"', r0.text)},
-                  key=int)
-    print(f"  phase/round filter terms: {len(tids)}")
+    charities = {m.group(1): strip_tags(m.group(2)) for m in re.finditer(
+        r'name="field_charity_target_id\[(\d+)\]"[^>]*>\s*<label[^>]*>(.*?)</label>',
+        r0.text, re.S)}
+    print(f"  grantee filter terms: {len(charities)}")
     rows = []
-    # filtered passes (stable small subsets) + one unfiltered pass (rows with
-    # no phase term), unioned — main() dedupes
-    for tid in tids + [None]:
-        params = {f"field_phase[{tid}]": tid} if tid else {}
+    for tid, cname in charities.items():
         page = 0
-        while page < 120:
-            r = requests.get(LIST_URL, params={**params, "page": page},
-                             headers=UA, timeout=60)
+        while page < 10:
+            r = requests.get(LIST_URL, headers=UA, timeout=60, params={
+                f"field_charity_target_id[{tid}]": tid, "page": page})
             r.raise_for_status()
             chunks = r.text.split('<div class="views-row">')[1:]
             if not chunks:
                 break
-            rows.extend(parse_row(c) for c in chunks)
+            rows.extend(parse_row(c, cname) for c in chunks)
             page += 1
-            time.sleep(0.2)
+            time.sleep(0.1)
     rows = [r for r in rows if r]
-    print(f"  listing: {len(rows)} rows across {len(tids)} round subsets + full crawl")
+    print(f"  listing: {len(rows)} rows across {len(charities)} grantee subsets")
     return rows
 
 
-def parse_row(c):
-    org_m = re.search(r'field--name-field-charity-link[^>]*>\s*<a href="([^"]*)"[^>]*>(.*?)</a>', c, re.S)
-    if not org_m:
-        org_m2 = re.search(r'field--name-field-charity.*?field__item[^>]*>(.*?)</div>', c, re.S)
-        org, url = (strip_tags(org_m2.group(1)), "") if org_m2 else ("", "")
-    else:
-        url, org = org_m.group(1), strip_tags(org_m.group(2))
-    if not org:
-        return None
+def parse_row(c, cname):
+    url_m = re.search(r'field--name-field-charity-link[^>]*>\s*<a href="([^"]*)"', c, re.S)
+    url = url_m.group(1) if url_m else ""
     phase_m = re.search(r'field--name-field-phase.*?cshs-term-group__title[^>]*>(.*?)</div>', c, re.S)
     round_m = re.search(r'field--name-field-round[^>]*>(.*?)</div>', c, re.S)
     grant_m = re.search(r'field--name-field-grant-value.*?field__item[^>]*>(.*?)</div>', c, re.S)
@@ -96,14 +101,15 @@ def parse_row(c):
     if grant_m:
         digits = re.sub(r"[^\d]", "", grant_m.group(1).split(".")[0])
         amt = int(digits) if digits else None
+    body = strip_tags(body_m.group(1)) if body_m else ""
     return {
-        "org": org, "url": url,
+        "org": cname, "url": url,
         "phase": strip_tags(phase_m.group(1)) if phase_m else "",
         "round": strip_tags(round_m.group(1)) if round_m else "",
         "loc_terms": " > ".join(t for t in loc_terms if t),
         "amount": amt,
         "project": strip_tags(title_m.group(1)) if title_m else "",
-        "desc": strip_tags(body_m.group(1))[:220] if body_m else "",
+        "body": body, "desc": body[:220],
     }
 
 
@@ -224,6 +230,55 @@ def place_geocode(location, cache):
     return hit
 
 
+# LAD names that are also common English words / personal names: trusted when they
+# appear in a project title or grantee name, ignored in free-text descriptions.
+AMBIG = {"Reading", "Hart", "Brent", "Bury", "Rother", "Arun", "Adur", "Eden",
+         "Craven", "Maldon", "Wyre", "Swale", "Rugby", "Dover", "Halton", "Boston",
+         "Pendle", "Lewes", "Three Rivers", "Mole Valley", "Charnwood", "Selby"}
+
+
+def lad_centroid(geom):
+    """Mean of all coordinates in a (multi)polygon: (lat, lon)."""
+    xs, ys = [], []
+
+    def walk(c):
+        if isinstance(c[0], (int, float)):
+            xs.append(c[0]); ys.append(c[1])
+        else:
+            for x in c:
+                walk(x)
+
+    walk(geom["coordinates"])
+    return float(np.mean(ys)), float(np.mean(xs))
+
+
+def load_lad_resolver():
+    """Return resolve(row) -> (lat, lon) | None, placing a project at the centroid
+    of the one English LAD its text names, or None when zero/ambiguous/many."""
+    feats = json.load(open(WEB_DATA / "lad.geojson"))["features"]
+    pts = {f["properties"]["name"]: lad_centroid(f["geometry"]) for f in feats}
+    pats = [(re.compile(r"\b" + re.escape(n) + r"\b"), n) for n in pts]
+
+    def named(text):
+        return {n for pat, n in pats if pat.search(text)}
+
+    def resolve(row):
+        title = named(f"{row['project']} {row['org']}")
+        if len(title) == 1:
+            return pts[next(iter(title))]
+        body = {n for n in named(row.get("body", "")) if n not in AMBIG}
+        if len(body) == 1:
+            return pts[next(iter(body))]
+        if title:                                  # title lists several; body picks one
+            both = title & named(row.get("body", ""))
+            if len(both) == 1:
+                return pts[next(iter(both))]
+        return None
+
+    print(f"  LAD resolver: {len(pts)} English authorities")
+    return resolve
+
+
 def main():
     cache_path = PROCESSED / "redress_projects.csv"
     if cache_path.exists():
@@ -251,6 +306,7 @@ def main():
               f"static-only = {len(merged)}")
 
         registers = register_lookup()
+        resolve_lad = load_lad_resolver()
         pcache, out = {}, []
         skipped = {"non_england": 0, "no_geocode": 0}
         for r in merged:
@@ -258,17 +314,22 @@ def main():
                 skipped["non_england"] += 1
                 continue
             pt, loc = None, ""
-            if r["town"]:
+            if r["town"]:                                  # Phase-1 town (most specific)
                 pt, loc = place_geocode(r["town"], pcache), "area"
-            if not pt:
+            if not pt and (pt := resolve_lad(r)):          # one LAD named in the text
+                loc = "area"
+            if not pt:                                     # grantee registered office
                 pt, loc = registers.get(norm_name(r["org"])), "office"
             if not pt:
                 skipped["no_geocode"] += 1
                 continue
-            out.append({**{k: v for k, v in r.items() if k not in ("loc_terms", "town")},
+            out.append({**{k: v for k, v in r.items()
+                           if k not in ("loc_terms", "town", "body")},
                         "region": r["loc_terms"],
                         "lat": round(pt[0], 5), "lon": round(pt[1], 5), "loc": loc})
-        print(f"  geocoded {len(out)} | skipped: {skipped}")
+        print(f"  geocoded {len(out)} | by source: "
+              f"{pd.Series([o['loc'] for o in out]).value_counts().to_dict()} | "
+              f"skipped: {skipped}")
         df = pd.DataFrame(out)
         df.to_csv(cache_path, index=False)
 

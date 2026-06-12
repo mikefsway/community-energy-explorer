@@ -37,19 +37,28 @@ In the web app, organisations (FCA / CEE / charity sources) and project sites
 ## Energy Redress funded projects
 - **Energy Industry Voluntary Redress Scheme** (Ofgem; administered by Energy Saving
   Trust). The full funded-projects list is scraped from two public pages:
-  the paginated Drupal view at https://energyredress.org.uk/funded-projects
-  (phase, round, grantee + website, country/region, grant value, project name,
-  description — scraped per phase/round filter term because the unfiltered view's
-  ordering drifts between page requests) and the static Phase-1 round tables at
-  https://energyredress.org.uk/projects (which add town-level locations). The two
-  are unioned and deduplicated on (organisation, round, amount, project name).
-- Geocoding: stated project town via postcodes.io `/places` where known
-  (`loc=area`), otherwise grantee name matched against the Charity Commission /
-  FCA registers → registered-office postcode (`loc=office`). Projects located in
-  Scotland, Wales or NI are excluded. Grantees that are CICs, councils or housing
-  associations without a register match cannot be geocoded and are dropped —
-  roughly a third of England-eligible rows; treat the layer as indicative, not a
-  complete census.
+  the Drupal view at https://energyredress.org.uk/funded-projects (phase, round,
+  grantee + website, country/region, grant value, project name, description) and
+  the static Phase-1 round tables at https://energyredress.org.uk/projects (which
+  add town-level locations). The view's default pager drifts between requests —
+  rows repeat, others are missed, and some published project nodes never surface
+  at all — so it is crawled per grantee using the `field_charity_target_id`
+  exposed filter (one stable subset per charity); the union is every funded
+  project. The two sources are unioned and deduplicated on (organisation, round,
+  amount, project name).
+- Geocoding, best available first: (1) stated Phase-1 project town via
+  postcodes.io `/places` (`loc=area`); (2) project text (title / grantee name /
+  description) naming exactly one English local authority → that LAD's centroid
+  (`loc=area`) — names in the title or grantee are trusted even when ambiguous
+  ("Reading"), but in free-text description, LAD names that are also common words
+  are ignored to avoid false matches; (3) grantee name matched against the
+  Charity Commission / FCA registers → registered-office postcode (`loc=office`).
+  Projects in Scotland, Wales or NI are excluded. England-eligible grantees with
+  no town, no recognised authority in the text, and no register match (often CICs,
+  councils or housing associations) still cannot be placed and are dropped, so the
+  layer remains indicative rather than a complete census — but coverage and
+  spatial accuracy are far better than office-only geocoding (most points are now
+  area-level, near the funded work, rather than at a charity head office).
 
 ## Energy knowledge bases
 - **UKRI Gateway to Research API** (https://gtr.ukri.org/gtr/api) — projects whose
