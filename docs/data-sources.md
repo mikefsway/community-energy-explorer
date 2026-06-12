@@ -44,8 +44,10 @@ In the web app, organisations (FCA / CEE / charity sources) and project sites
   rows repeat, others are missed, and some published project nodes never surface
   at all — so it is crawled per grantee using the `field_charity_target_id`
   exposed filter (one stable subset per charity); the union is every funded
-  project. The two sources are unioned and deduplicated on (organisation, round,
-  amount, project name).
+  project. The two sources are unioned and deduplicated per grantee: rows are
+  the same grant when their amounts are near-identical (the two pages round
+  amounts differently, usually by £1) or when project title, phase and round
+  all agree (the pages also word some titles differently).
 - Geocoding, best available first: (1) stated Phase-1 project town via
   postcodes.io `/places` (`loc=area`); (2) project text (title / grantee name /
   description) naming exactly one English local authority → that LAD's centroid

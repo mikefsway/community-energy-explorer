@@ -77,6 +77,6 @@ Derived from these:
 
 Installed capacity is parsed from the CEE-map `kind` field (e.g. `Solar · 24 kW`). Not
 every scheme records a size and the extract is 2024 vintage, so capacity totals are a
-floor, not a census. Like the map, organisation and redress locations are the named
-local authority, a stated project town, or a registered office, and may differ from
-where work actually happens.
+floor, not a census. Like the map, organisation locations are registered offices and
+redress projects sit at the named local authority, a stated project town, or the
+grantee's registered office — any of which may differ from where work actually happens.

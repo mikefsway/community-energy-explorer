@@ -294,13 +294,28 @@ def main():
             if key not in seen:
                 seen.add(key)
                 deduped.append(dict(r, town=""))
-        # enrich with static towns; append static rows missing from the view
-        view_keys = {(norm_name(r["org"]), r["amount"]) for r in deduped}
-        towns = {(norm_name(r["org"]), r["amount"]): r["town"] for r in static}
+        # enrich with static towns; append static rows missing from the view.
+        # The two sources round grant amounts differently (usually ±£1) and
+        # word project titles differently, so neither an exact-amount nor a
+        # title join alone is safe: treat a static row as the same grant as a
+        # view row when the grantee matches and either the amounts are near-
+        # identical or the title, phase and round all agree.
+        by_org = {}
         for r in deduped:
-            r["town"] = towns.get((norm_name(r["org"]), r["amount"]), "")
-        extra = [r for r in static
-                 if (norm_name(r["org"]), r["amount"]) not in view_keys]
+            by_org.setdefault(norm_name(r["org"]), []).append(r)
+        extra = []
+        for s in static:
+            hit = next(
+                (v for v in by_org.get(norm_name(s["org"]), [])
+                 if (v["amount"] and s["amount"]
+                     and abs(v["amount"] - s["amount"]) <= 2)
+                 or (norm_name(v["project"]) == norm_name(s["project"])
+                     and (v["phase"], v["round"]) == (s["phase"], s["round"]))),
+                None)
+            if hit:
+                hit["town"] = hit["town"] or s["town"]
+            else:
+                extra.append(s)
         merged = deduped + extra
         print(f"  view {len(deduped)} (deduped from {len(rows)}) + {len(extra)} "
               f"static-only = {len(merged)}")
