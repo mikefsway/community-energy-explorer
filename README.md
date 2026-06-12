@@ -10,6 +10,7 @@ where it would be most beneficial.
 
 **Live map:** https://mikefsway.github.io/community-energy-explorer/
 **Data explorer:** https://mikefsway.github.io/community-energy-explorer/explore.html
+**Insights report:** https://mikefsway.github.io/community-energy-explorer/insights.html
 
 ## Data explorer
 
@@ -32,6 +33,17 @@ from the data (capacity concentration, how presence/readiness/redress correlate 
 deprivation). Map and explorer cross-link both ways: `explore.html?lad=<code>` opens an
 authority's drawer, `index.html?lad=<code>` flies the map there with the authority's
 scores in the side panel.
+
+## Insights report
+
+`insights.html` is a written read-across of the whole dataset: whether community energy
+sits where deprivation is (at neighbourhood and authority level), why the gap runs through
+enabling conditions rather than deprivation itself, how concentrated installed capacity is,
+where community energy already works in deprived places, how Energy Redress funding tracks
+need, and a three-tier view of where effort would go furthest. The prose is fixed; every
+number and chart recomputes in the browser from `explore.json` plus `insights.json`
+(the LSOA-decile distribution of community-energy points, emitted by pipeline stage
+`p09_insights.py`).
 
 See `docs/method.md` for how the three axes are built.
 

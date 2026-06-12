@@ -9,7 +9,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 STAGES = ["p01_imd_boundaries.py", "p03_infra.py", "p02_energy_orgs.py",
           "p04_grid.py", "p05_composite.py", "p06_redress.py", "p07_knowledge.py",
-          "p08_explore.py"]
+          "p08_explore.py", "p09_insights.py"]
 
 for stage in STAGES:
     print(f"\n=== {stage} ===")

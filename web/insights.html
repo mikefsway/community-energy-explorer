@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community Energy Explorer — Insights</title>
+<meta name="description" content="What the data says about where community energy in England sits relative to deprivation, why the gap exists, and where effort would go furthest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,900&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="explore-body">
+
+<header class="explore-top">
+  <div class="explore-top-inner">
+    <div>
+      <div class="kicker">England · what the data shows</div>
+      <h1>Community <em>Energy</em> — insights</h1>
+    </div>
+    <nav class="view-nav">
+      <a class="view-pill" href="index.html">Map</a>
+      <a class="view-pill" href="explore.html">Data explorer</a>
+      <a class="view-pill active" href="insights.html">Insights</a>
+    </nav>
+  </div>
+</header>
+
+<main class="explore-main report">
+
+  <p class="standfirst lead">This page reads across everything the project collects —
+  deprivation, civic fabric, energy knowledge bases, grid headroom, community energy itself
+  and Energy Redress funding — with one question in mind: <strong>if you wanted community
+  energy to grow where it would do the most good, where would you start, and what would
+  have to change?</strong> Every figure below is recomputed from the data each time it
+  refreshes, so the numbers stay honest; the reading of them is ours.
+  <span class="report-date" id="report-date"></span></p>
+
+  <nav class="report-toc" id="report-toc">
+    <a href="#where">1 · Where it is</a>
+    <a href="#upstream">2 · Why the gap</a>
+    <a href="#capacity">3 · Capacity</a>
+    <a href="#pioneers">4 · Pioneers</a>
+    <a href="#redress">5 · Redress</a>
+    <a href="#knowledge">6 · A null result</a>
+    <a href="#start">7 · Where to start</a>
+  </nav>
+
+  <!-- ================= 1 ================= -->
+  <section class="report-s" id="where">
+    <h2><span class="s-num">1</span>Community energy mostly is not where deprivation is</h2>
+
+    <p>The simplest version of the question first: are community energy organisations more
+    or less likely to be found in deprived places? At neighbourhood level the answer is
+    <strong>less likely — but the shortfall is at the extremes, not across the board</strong>.
+    The most deprived tenth of neighbourhoods actually hosts roughly its population share of
+    registered offices (city-centre addresses often fall in deprived LSOAs, which flatters
+    this figure). But across the most deprived fifth as a whole, organisations are clearly
+    under-represented: <strong class="n" data-n="orgBotFifth">–</strong> of offices for
+    <strong class="n" data-n="popBotFifth">–</strong> of the population. The sector's centre
+    of gravity is mid-ranking England — deciles 4 to 8 hold
+    <span class="n" data-n="orgMid">–</span> of organisations on
+    <span class="n" data-n="popMid">–</span> of the population — and it thins again in the
+    wealthiest neighbourhoods.</p>
+
+    <p>Project sites — the schemes actually built — tilt further from need than the offices
+    do: <span class="n" data-n="siteBotFifth">–</span> of sites sit in the most deprived
+    fifth of neighbourhoods.</p>
+
+    <figure class="fig">
+      <div id="fig-deciles"></div>
+      <figcaption>Community-energy points per deprivation decile, relative to each decile's
+      share of England's population. 1.0 means a decile has exactly its population share;
+      decile 1 is the most deprived tenth of neighbourhoods.</figcaption>
+    </figure>
+
+    <p>Roll the same question up to the <span class="n" data-n="nLads">–</span> local
+    authorities and the gap widens, because it compounds: the most deprived fifth of
+    authorities has <strong class="n" data-n="q1per100k">–</strong> community-energy
+    organisations and sites per 100,000 people against
+    <strong class="n" data-n="q5per100k">–</strong> in the least deprived fifth, and
+    <strong class="n" data-n="q1none">–</strong> of the most deprived fifth has no community
+    energy at all, against <span class="n" data-n="q5none">–</span> at the other end.
+    Nationally, <span class="n" data-n="popNoCe">–</span> million people —
+    <span class="n" data-n="popNoCePct">–</span> of England — live in an authority with
+    none, and those authorities are more deprived than average.</p>
+
+    <figure class="fig">
+      <div id="fig-quintiles" class="fig-pair"></div>
+      <figcaption>By local-authority deprivation quintile (1 = most deprived fifth):
+      community energy per 100,000 people, and the share of authorities with none at all.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= 2 ================= -->
+  <section class="report-s" id="upstream">
+    <h2><span class="s-num">2</span>The gap is upstream, in the conditions</h2>
+
+    <p>It would be easy to read the pattern above as deprived places being unable or
+    unwilling to do community energy. The data points somewhere else. Presence tilts away
+    from deprivation only moderately (r&nbsp;=&nbsp;<span class="n" data-n="rNeedPres">–</span>
+    across authorities), but the <em>enabling conditions</em> — civic fabric, knowledge
+    nearby, grid headroom — tilt away twice as hard
+    (r&nbsp;=&nbsp;<span class="n" data-n="rNeedReady">–</span>). And once you hold those
+    conditions constant, deprivation stops predicting presence almost entirely (partial
+    correlation <span class="n" data-n="rPartial">–</span>).</p>
+
+    <p class="pull">Deprived places are not worse at turning conditions into community
+    energy. They have fewer conditions to turn.</p>
+
+    <p>The typology makes the same point visually. Just over half of the most deprived
+    fifth of authorities sit in the <span class="badge cold">Cold</span> quadrant — thin
+    conditions, little community energy — against
+    <span class="n" data-n="q5cold">–</span> of the least deprived fifth. But look at the
+    <span class="badge pioneering">Pioneering</span> band: community energy that exists
+    <em>despite</em> thin conditions is disproportionately a deprived-area phenomenon
+    (<span class="n" data-n="q1pio">–</span> of the most deprived fifth, versus
+    <span class="n" data-n="q5pio">–</span> of the least). Where the sector does take root
+    in hard ground, that ground is usually deprived — which is the opposite of what a
+    “deprived places can’t” story would predict.</p>
+
+    <figure class="fig">
+      <div id="fig-typology"></div>
+      <figcaption>How each deprivation quintile of authorities splits across the four
+      readiness × presence types.</figcaption>
+    </figure>
+
+    <p>The practical implication: effort aimed at deprived areas should go into the
+    conditions themselves — paid local organising capacity where volunteer civic fabric is
+    thin, rather than competitions that reward places already organised enough to bid.
+    Exhortation aimed at communities, without that, asks them to convert assets they
+    don't have.</p>
+  </section>
+
+  <!-- ================= 3 ================= -->
+  <section class="report-s" id="capacity">
+    <h2><span class="s-num">3</span>Installed capacity is a different and starker story</h2>
+
+    <p>Counting organisations understates how uneven the sector is, because most
+    organisations are small and a few schemes are very large. Of the
+    <span class="n" data-n="capTotal">–</span> of recorded capacity, the top ten authorities
+    hold <strong class="n" data-n="capTop10">–</strong>, and
+    <span class="n" data-n="capZeroLads">–</span> of <span class="n" data-n="nLads2">–</span>
+    authorities have none recorded at all. The most deprived fifth of authorities holds
+    <strong class="n" data-n="capQ1Share">–</strong> of national capacity. Split England at
+    its median latitude and the southern half holds
+    <span class="n" data-n="capSouth">–</span>.</p>
+
+    <figure class="fig">
+      <div id="fig-captop"></div>
+      <figcaption>The ten authorities with the most recorded community-energy capacity,
+      coloured by deprivation quintile. Treat the absolute numbers as a floor: capacity
+      comes from the community-maintained CEE map (2024) and many schemes record no size —
+      Lambeth's total is dominated by a single 25&nbsp;MW solar portfolio.</figcaption>
+    </figure>
+
+    <p>So even where deprived areas do have community energy, it is mostly the small end of
+    it. If the aim is for deprived places to hold income-generating energy assets — not
+    just energy-advice projects — the capacity map, not the organisation map, is the gap
+    to watch.</p>
+  </section>
+
+  <!-- ================= 4 ================= -->
+  <section class="report-s" id="pioneers">
+    <h2><span class="s-num">4</span>It can clearly work in deprived places</h2>
+
+    <p>The strongest argument against fatalism is already in the data. These are the
+    authorities in the most deprived third with the strongest community-energy presence
+    per head — places that falsify the idea that deprivation itself is the barrier:</p>
+
+    <div class="report-lists one" id="list-pioneers"></div>
+
+    <p>Plymouth tops the list by a wide margin, and its story is instructive: Plymouth
+    Energy Community was founded with the city council's active involvement, an anchor
+    institution doing the early heavy lifting that volunteer civic fabric would otherwise
+    have to supply. The pattern that deserves proper investigation — this dataset can pose
+    the question but not answer it — is how many of the other pioneers share that shape:
+    a council, housing association or similar body lowering the start-up bar. If most do,
+    that is the replicable mechanism for the cold quadrant.</p>
+  </section>
+
+  <!-- ================= 5 ================= -->
+  <section class="report-s" id="redress">
+    <h2><span class="s-num">5</span>One funding stream already follows need — build on it</h2>
+
+    <p>Energy Redress money (Ofgem fines, redistributed to energy-hardship projects) is the
+    counter-example to everything above: it tracks deprivation well. The most deprived two
+    fifths of authorities receive <span class="n" data-n="redressQ12">–</span> per person
+    against <span class="n" data-n="redressQ45">–</span> in the least deprived two fifths.</p>
+
+    <figure class="fig">
+      <div id="fig-redress"></div>
+      <figcaption>Energy Redress funding per person by local-authority deprivation
+      quintile (1 = most deprived fifth).</figcaption>
+    </figure>
+
+    <p>That matters for growth strategy because it means trusted, energy-literate delivery
+    organisations are already funded and working in deprived places that have no
+    community-energy organisation of their own —
+    <span class="n" data-n="nFootholds">–</span> authorities in the most deprived third fit
+    that description. These are footholds: the relationships and credibility that a new
+    community energy organisation spends its first years building already exist there,
+    attached to fuel-poverty work rather than generation or ownership. Connecting that
+    advice infrastructure to asset ownership is a much shorter bridge than starting cold.</p>
+
+    <div class="report-lists one" id="list-footholds"></div>
+  </section>
+
+  <!-- ================= 6 ================= -->
+  <section class="report-s" id="knowledge">
+    <h2><span class="s-num">6</span>A null result worth knowing: proximity to expertise predicts nothing</h2>
+
+    <p>Distance to the nearest energy knowledge base — universities with energy research,
+    catapults, DNO headquarters and the like — has essentially no relationship with
+    community-energy presence (r&nbsp;=&nbsp;<span class="n" data-n="rKnow">–</span>).
+    Newham is five kilometres from Ofgem's front door and has no community energy at all;
+    Manchester, with one of the country's largest university energy programmes in the middle
+    of it, has plenty. Read with the previous sections,
+    this suggests expertise travels — what does not travel is organising capacity. Money
+    spent putting knowledge <em>near</em> places is probably worth less than money spent
+    putting organisers <em>in</em> them. (The measure is crude — straight-line distance to
+    an institution says nothing about actual relationships — so treat this as a prompt for
+    better evidence, not a verdict.)</p>
+  </section>
+
+  <!-- ================= 7 ================= -->
+  <section class="report-s" id="start">
+    <h2><span class="s-num">7</span>Where to start, in three tiers</h2>
+
+    <p>Putting the threads together — need, conditions, presence, and what Redress already
+    knows — three different kinds of place call for three different kinds of effort.</p>
+
+    <div class="report-lists" id="lists-start"></div>
+
+    <p>The first tier is where conventional support (grant rounds, technical assistance,
+    shared-ownership offers) should convert fastest: the conditions exist, the sector just
+    has not arrived. The second tier is where the cheapest route in is through organisations
+    already funded and trusted. The third tier — <span class="n" data-n="nOverlooked">–</span>
+    authorities, <span class="n" data-n="popOverlooked">–</span> million people, almost all
+    deep in the cold quadrant — is where nothing short of patient, paid capacity-building
+    will move the needle, and where competitive funding designed around shovel-ready bids
+    will keep not arriving.</p>
+  </section>
+
+  <section class="report-s caveats">
+    <h2 class="caveat-h">Caveats, before anyone quotes this</h2>
+    <ul>
+      <li>Organisation locations are registered offices and Redress locations are grantee
+      addresses or stated project towns — where work happens can differ, and city-centre
+      registered offices can sit in deprived LSOAs for unrelated reasons.</li>
+      <li>Capacity comes from the community-maintained CEE map (2024 vintage); many schemes
+      record no size, so totals are floors and single large schemes dominate some areas.</li>
+      <li>Grid headroom covers only the Northern Powergrid and SSEN SEPD licence areas;
+      elsewhere readiness uses a neutral grid score.</li>
+      <li>Everything here is cross-sectional association. None of it establishes what
+      causes what — the pioneers section in particular is a research question, not a
+      finding.</li>
+      <li>Deprivation is the 2025 English Indices, population-weighted to authorities.
+      Method detail: <a href="explore.html">the data explorer</a> and the
+      <a href="https://github.com/mikefsway/community-energy-explorer" target="_blank" rel="noopener">repository</a>.</li>
+    </ul>
+  </section>
+
+</main>
+
+<script src="insights.js"></script>
+</body>
+</html>
