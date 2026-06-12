@@ -62,6 +62,27 @@ function bivarLegend() {
 }
 
 const fmt = n => n == null ? "–" : n.toLocaleString("en-GB");
+const ord = p => { // percentile 0..1 → "67th"
+  if (p == null) return "–";
+  const n = Math.round(p * 100), v = n % 100;
+  return n + (["th", "st", "nd", "rd"][(v - 20) % 10] || ["th", "st", "nd", "rd"][v] || "th");
+};
+const kwfmt = n => !n ? "none recorded" : n >= 1000 ? (n / 1000).toFixed(1) + " MW" : Math.round(n) + " kW";
+const gbp = n => !n ? "£0" : n >= 1e6 ? "£" + (n / 1e6).toFixed(1) + "m" : "£" + Math.round(n / 1e3) + "k";
+const TYP = {
+  thriving:   { label: "Thriving",  blurb: "good conditions, lots of community energy" },
+  latent:     { label: "Latent",    blurb: "good conditions, little community energy yet" },
+  pioneering: { label: "Pioneering", blurb: "community energy despite thin conditions" },
+  cold:       { label: "Cold",      blurb: "thin conditions, little community energy" },
+};
+
+/* LAD-level analytics from the data explorer (explore.json), keyed by LAD code */
+let EXPLORE = null;
+const explorePromise = (async () => {
+  const j = await fetchJson(DATA + "explore.json");
+  if (j && j.lads) { EXPLORE = {}; j.lads.forEach(d => EXPLORE[d.code] = d); }
+  return EXPLORE;
+})();
 
 const map = new maplibregl.Map({
   container: "map",
@@ -247,12 +268,20 @@ async function init() {
   applyDeepLink();
 }
 
-/* fly to ?lat=&lon=&z= on load (used by the data explorer's "view on map" links) */
+/* fly to ?lat=&lon=&z= on load, and show ?lad= in the detail panel
+ * (used by the data explorer's "view on map" links) */
 function applyDeepLink() {
   const q = new URLSearchParams(location.search);
   const lat = parseFloat(q.get("lat")), lon = parseFloat(q.get("lon"));
+  const lad = q.get("lad");
+  if (lad) showLadDetail({ code: lad });
   if (Number.isFinite(lat) && Number.isFinite(lon)) {
     map.flyTo({ center: [lon, lat], zoom: parseFloat(q.get("z")) || 9.2 });
+  } else if (lad) {
+    explorePromise.then(() => {
+      const x = EXPLORE && EXPLORE[lad];
+      if (x) map.flyTo({ center: [x.lon, x.lat], zoom: 9.2 });
+    });
   }
 }
 
@@ -291,7 +320,10 @@ async function refreshLsoaViewport() {
   const chunks = await Promise.all(unique.map(c => fetchJson(`${DATA}lsoa/${c}.json`)));
   let added = false;
   chunks.forEach((fc, i) => {
-    if (fc && fc.features) { state.lsoaFeatures.push(...fc.features); added = true; }
+    if (fc && fc.features) {
+      fc.features.forEach(f => f.properties.lad = unique[i]);
+      state.lsoaFeatures.push(...fc.features); added = true;
+    }
     else state.loadedLads.delete(unique[i]);
   });
   if (added) map.getSource("lsoa").setData({ type: "FeatureCollection", features: state.lsoaFeatures });
@@ -393,18 +425,36 @@ function showLsoaDetail(p) {
     <div class="stat-row"><span class="k">Energy orgs registered here</span><span class="v">${p.org || 0}</span></div>
     <div class="stat-row"><span class="k">Community venues</span><span class="v">${p.inf || 0}</span></div>
     <div class="stat-row"><span class="k">Need × readiness</span><span class="v">${cmpLabel}</span></div>
+    ${p.lad ? `<a class="explore-link" href="explore.html?lad=${esc(p.lad)}">${esc(p.ladn || "Authority")} in the data explorer →</a>` : ""}
   </div>`;
 }
 
-function showLadDetail(p) {
+async function showLadDetail(p) {
+  await explorePromise;
+  const x = EXPLORE && EXPLORE[p.code];
+  const name = p.name || (x && x.name) || p.code;
+  const axis = (k, v) => `<div class="d-axis"><span>${k}</span>
+    <span class="minibar wide"><i style="width:${v != null ? Math.round(v * 100) : 0}%"></i></span><b>${ord(v)}</b></div>`;
   document.getElementById("detail").innerHTML = `<div class="detail-card">
-    <h3>${esc(p.name)}</h3>
-    <div class="sub">Local authority</div>
-    <div class="stat-row"><span class="k">Population</span><span class="v">${fmt(p.pop)}</span></div>
-    <div class="stat-row"><span class="k">Avg IMD score (pop-weighted)</span><span class="v">${p.imd_s != null ? (+p.imd_s).toFixed(1) : "–"}</span></div>
-    <div class="stat-row"><span class="k">Share of LSOAs in most deprived 20%</span><span class="v">${p.pct12 != null ? Math.round(p.pct12 * 100) + "%" : "–"}</span></div>
+    <h3>${esc(name)}</h3>
+    <div class="sub">Local authority${x ? ` · <span class="badge ${x.typology}">${TYP[x.typology].label}</span>` : ""}</div>
+    ${x ? `<p class="typ-blurb">${TYP[x.typology].blurb}</p>
+    <div class="d-axes">
+      ${axis("Need (deprivation)", x.need_p)}
+      ${axis("Readiness", x.ready_p)}
+      ${axis("CE presence", x.presence_p)}
+    </div>` : ""}
+    <div class="stat-row"><span class="k">Population</span><span class="v">${fmt(p.pop ?? (x && x.pop))}</span></div>
+    <div class="stat-row"><span class="k">Avg IMD score (pop-weighted)</span><span class="v">${p.imd_s != null ? (+p.imd_s).toFixed(1) : x ? (+x.imd_s).toFixed(1) : "–"}</span></div>
+    ${p.pct12 != null ? `<div class="stat-row"><span class="k">Share of LSOAs in most deprived 20%</span><span class="v">${Math.round(p.pct12 * 100)}%</span></div>` : ""}
+    ${x ? `
+    <div class="stat-row"><span class="k">Community energy orgs · sites</span><span class="v">${x.ce_orgs} · ${x.ce_sites}</span></div>
+    <div class="stat-row"><span class="k">Known installed capacity</span><span class="v">${kwfmt(x.cap_kw)}</span></div>
+    <div class="stat-row"><span class="k">Energy Redress funding</span><span class="v">${gbp(x.redress_total)}</span></div>
+    <div class="stat-row"><span class="k">Nearest knowledge base</span><span class="v">${esc(x.know_name || "–")} · ${x.know_km} km</span></div>
+    <a class="explore-link" href="explore.html?lad=${esc(p.code)}">Full profile in the data explorer →</a>` : `
     <div class="stat-row"><span class="k">Community energy organisations</span><span class="v">${p.orgs || 0}</span></div>
-    <div class="stat-row"><span class="k">Community venues</span><span class="v">${fmt(p.inf)}</span></div>
+    <div class="stat-row"><span class="k">Community venues</span><span class="v">${fmt(p.inf)}</span></div>`}
     <div class="stat-row"><span class="k">Zoom in</span><span class="v">neighbourhood detail</span></div>
   </div>`;
 }

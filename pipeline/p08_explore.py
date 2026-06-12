@@ -137,10 +137,11 @@ def main():
         rows[lad]["redress_total"] += int(p.get("total", 0))
 
     # --- knowledge bases: count within LAD ---
-    know_pts = []
+    know_pts, know_names = [], []
     for f in load_geojson("knowledge.geojson"):
         lon, lat = f["geometry"]["coordinates"][:2]
         know_pts.append((lat, lon))
+        know_names.append(f["properties"].get("name", ""))
         lad = lad_of(f)
         if lad in rows:
             rows[lad]["know_count"] += 1
@@ -166,19 +167,26 @@ def main():
         df[c] = df[c].astype(float)
 
     # --- nearest knowledge base from LAD centroid (km) ---
-    know_km = []
+    know_km, know_name = [], []
     for code in df["code"]:
         lat, lon = centroids[code]
         d = haversine_km(lat, lon, know_pts[:, 0], know_pts[:, 1])
-        know_km.append(round(float(d.min()), 1))
+        i = int(d.argmin())
+        know_km.append(round(float(d[i]), 1))
+        know_name.append(know_names[i])
     df["know_km"] = know_km
+    df["know_name"] = know_name
 
     # --- derived percentile indices ---
     df["ce_per_100k"] = (df["ce_total"] / df["pop"].clip(lower=1) * 1e5).round(2)
     df["cap_per_1k"] = (df["cap_kw"] / df["pop"].clip(lower=1) * 1000).round(2)
 
     df["need_p"] = pctrank(df["imd_s"]).round(3)
-    df["presence_p"] = pctrank(df["ce_per_100k"]).round(3)
+    # presence has a large tie mass at zero (LADs with no CE at all); average-rank
+    # percentiles would put them all at ~0.15. Use share-strictly-below so "none"
+    # reads as exactly 0 and the opportunity score isn't suppressed for them.
+    df["presence_p"] = ((df["ce_per_100k"].rank(method="min") - 1)
+                        / (len(df) - 1)).round(3)
 
     # enabling conditions (independent of existing CE so opportunity is meaningful)
     infra_p = pctrank(df["infra_per_1k"])
@@ -223,7 +231,8 @@ def main():
     fields = {
         "need_p": "Deprivation percentile (IMD 2025, higher = more deprived)",
         "ready_p": "Enabling-conditions percentile: civic fabric 50%, knowledge proximity 25%, grid headroom 25% (excludes existing community energy)",
-        "presence_p": "Existing community-energy percentile (orgs + project sites per 100k people)",
+        "presence_p": "Existing community-energy percentile (orgs + project sites per 100k people; share of LADs strictly below, so no-CE LADs = 0)",
+        "know_name": "Name of the nearest energy knowledge base (from LAD centroid)",
         "opportunity": "ready_p − presence_p: high = good conditions but little community energy yet (easy wins)",
         "struggle": "need_p × (1 − ready_p): high = deprived AND thin enabling conditions (hardest ground)",
         "typology": "thriving / latent (easy win) / pioneering / cold, from median split of readiness × presence",

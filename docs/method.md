@@ -60,6 +60,10 @@ All headline axes are percentile ranks across those authorities:
   energy knowledge base (25%), and green grid headroom where the DNO publishes it (25%;
   a neutral 0.5 elsewhere).
 - **presence_p** — community-energy organisations + project sites per 100k people.
+  Because 87 authorities have none at all, this one is ranked as the share of
+  authorities *strictly below* (not the tie-averaged percentile), so "none" scores
+  exactly 0 rather than ~0.15 and the opportunity score isn't suppressed for the
+  very places the latent lens is meant to surface.
 
 Derived from these:
 

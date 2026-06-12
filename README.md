@@ -18,14 +18,20 @@ authority on three axes — **need** (deprivation), **readiness** (civic fabric 
 energy knowledge + grid headroom, deliberately excluding existing community energy) and
 **presence** (community energy already on the ground) — and answers four questions:
 
-- **Ranked table** — every authority and metric, sortable/filterable, with an installed-size
-  slider ("which places have community energy above X kW") and CSV export.
+- **Ranked table** — every authority and metric, sortable/filterable, with project-size
+  filter chips ("which places have a community project of 100 kW+") and CSV export.
 - **Opportunity map** — readiness × presence quadrants: *thriving*, *latent* (easy wins —
   ready but empty), *pioneering*, *cold*.
 - **Mismatches** — civic fabric without the energy; a knowledge base on the doorstep but no
   organisation; grid headroom going spare; deprived-and-overlooked.
 - **Redress & need** — does Energy Redress funding track deprivation, and where do deprived
   places get neither community energy nor redress.
+
+The explorer opens with a "what the data says" strip of headline findings computed live
+from the data (capacity concentration, how presence/readiness/redress correlate with
+deprivation). Map and explorer cross-link both ways: `explore.html?lad=<code>` opens an
+authority's drawer, `index.html?lad=<code>` flies the map there with the authority's
+scores in the side panel.
 
 See `docs/method.md` for how the three axes are built.
 
