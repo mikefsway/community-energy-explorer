@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community Energy Explorer — Data explorer</title>
+<meta name="description" content="Where community energy in England is doing well, where it could most easily do better, and where it would struggle — a data explorer over deprivation, civic fabric, knowledge, grid and redress.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,900&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="explore-body">
+
+<header class="explore-top">
+  <div class="explore-top-inner">
+    <div>
+      <div class="kicker">England · local authority view</div>
+      <h1>Community <em>Energy</em> — data explorer</h1>
+    </div>
+    <nav class="view-nav">
+      <a class="view-pill" href="index.html">← Map</a>
+      <a class="view-pill active" href="explore.html">Data explorer</a>
+    </nav>
+  </div>
+</header>
+
+<main class="explore-main">
+  <p class="standfirst lead">Every English local authority scored on three axes — <strong>need</strong>
+  (deprivation), <strong>readiness</strong> (civic fabric, energy knowledge nearby, grid headroom)
+  and <strong>presence</strong> (community energy already on the ground). Use it to find where the
+  sector is thriving, where it could most easily grow, and where it would struggle.
+  <button id="method-btn" class="link-btn">How these are built ↗</button></p>
+
+  <div id="stat-strip" class="stat-strip"></div>
+
+  <nav class="lens-tabs" id="lens-tabs" role="tablist">
+    <button class="lens-tab active" data-lens="table" role="tab">Ranked table</button>
+    <button class="lens-tab" data-lens="typology" role="tab">Opportunity map</button>
+    <button class="lens-tab" data-lens="mismatch" role="tab">Mismatches</button>
+    <button class="lens-tab" data-lens="redress" role="tab">Redress &amp; need</button>
+  </nav>
+
+  <section id="lens-panel" class="lens-panel" aria-live="polite"></section>
+</main>
+
+<aside id="drawer" class="drawer hidden">
+  <button class="drawer-close" id="drawer-close">×</button>
+  <div id="drawer-body"></div>
+</aside>
+<div id="drawer-scrim" class="drawer-scrim hidden"></div>
+
+<div id="method-modal" class="modal hidden">
+  <div class="modal-card">
+    <button class="modal-close" id="method-close">×</button>
+    <h2>How the explorer is built</h2>
+    <div class="modal-scroll">
+    <p>Every metric is rolled up to the <strong>local authority district</strong> (296 in England).
+    The three headline axes are percentile ranks across those authorities:</p>
+    <ul>
+      <li><strong>Need</strong> — population-weighted deprivation (English Indices of Deprivation 2025).
+      Higher = more deprived.</li>
+      <li><strong>Readiness</strong> — the <em>enabling conditions</em>, deliberately excluding existing
+      community energy so the comparison is meaningful: civic fabric (charities + community venues per
+      resident, 50%), proximity to an energy knowledge base (25%), and green grid headroom where the
+      network operator publishes it (25%).</li>
+      <li><strong>Presence</strong> — community energy already on the ground: registered societies,
+      Community Energy England members and CEE-map project sites, per 100,000 people.</li>
+    </ul>
+    <p>From these:</p>
+    <ul>
+      <li><strong>Opportunity</strong> = readiness − presence. High means good conditions but little
+      community energy yet — the easiest wins.</li>
+      <li><strong>Struggle</strong> = need × (1 − readiness). High means deprived <em>and</em> thin on
+      enabling conditions — the hardest ground.</li>
+      <li><strong>Typology</strong> — a median split of readiness × presence into <em>thriving</em>,
+      <em>latent</em> (easy win), <em>pioneering</em> and <em>cold</em>.</li>
+    </ul>
+    <p class="small">Caveats: installed capacity comes from the community-maintained CEE map (2024
+    vintage) and not every scheme records a size, so capacity totals are a floor, not a census.
+    Grid headroom covers only the Northern Powergrid and SSEN SEPD areas; elsewhere readiness uses a
+    neutral grid score. Organisation and redress locations are registered offices or stated project
+    towns, which may differ from where work actually happens. Full sources and method:
+    <a href="https://github.com/mikefsway/community-energy-explorer" target="_blank" rel="noopener">the repository</a>.</p>
+    </div>
+  </div>
+</div>
+
+<script src="explore.js"></script>
+</body>
+</html>

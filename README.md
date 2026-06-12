@@ -9,6 +9,25 @@ The aim: understand where places are on the journey to delivering community ener
 where it would be most beneficial.
 
 **Live map:** https://mikefsway.github.io/community-energy-explorer/
+**Data explorer:** https://mikefsway.github.io/community-energy-explorer/explore.html
+
+## Data explorer
+
+Beyond the map, `explore.html` is a data-first view that scores every English local
+authority on three axes — **need** (deprivation), **readiness** (civic fabric + nearby
+energy knowledge + grid headroom, deliberately excluding existing community energy) and
+**presence** (community energy already on the ground) — and answers four questions:
+
+- **Ranked table** — every authority and metric, sortable/filterable, with an installed-size
+  slider ("which places have community energy above X kW") and CSV export.
+- **Opportunity map** — readiness × presence quadrants: *thriving*, *latent* (easy wins —
+  ready but empty), *pioneering*, *cold*.
+- **Mismatches** — civic fabric without the energy; a knowledge base on the doorstep but no
+  organisation; grid headroom going spare; deprived-and-overlooked.
+- **Redress & need** — does Energy Redress funding track deprivation, and where do deprived
+  places get neither community energy nor redress.
+
+See `docs/method.md` for how the three axes are built.
 
 ## Layers
 
@@ -34,7 +53,7 @@ where it would be most beneficial.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt
-.venv/bin/python pipeline/run_all.py        # stages: p01, p03, p02, p04, p05, p06, p07
+.venv/bin/python pipeline/run_all.py        # stages: p01, p03, p02, p04, p05, p06, p07, p08
 ```
 
 ## Licences

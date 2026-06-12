@@ -47,3 +47,30 @@ Interpretation for "where on the journey":
   do not feed the readiness score. Redress geocoding drops grantees absent from the
   charity/FCA registers (~⅓ of England rows), so absence of a point is weak evidence
   of absence of activity.
+
+## Data explorer (LAD-level)
+
+`p08_explore.py` rolls every dataset up to the **local authority district** (296 in
+England) and writes `web/data/explore.json`, which the `explore.html` page reasons over.
+All headline axes are percentile ranks across those authorities:
+
+- **need_p** — population-weighted IMD 2025 score (higher = more deprived).
+- **ready_p** — *enabling conditions*, excluding existing community energy so the
+  comparison stays meaningful: civic fabric per resident (50%), proximity to the nearest
+  energy knowledge base (25%), and green grid headroom where the DNO publishes it (25%;
+  a neutral 0.5 elsewhere).
+- **presence_p** — community-energy organisations + project sites per 100k people.
+
+Derived from these:
+
+- **opportunity** = `ready_p − presence_p` — high = good conditions, little community
+  energy yet (the easiest places to grow).
+- **struggle** = `need_p × (1 − ready_p)` — high = deprived *and* thin on enabling
+  conditions (the hardest ground).
+- **typology** — median split of readiness × presence into *thriving* / *latent* (easy
+  win) / *pioneering* / *cold*.
+
+Installed capacity is parsed from the CEE-map `kind` field (e.g. `Solar · 24 kW`). Not
+every scheme records a size and the extract is 2024 vintage, so capacity totals are a
+floor, not a census. Like the map, organisation and redress locations are registered
+offices or stated project towns and may differ from where work actually happens.

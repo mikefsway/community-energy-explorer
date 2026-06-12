@@ -244,6 +244,16 @@ async function init() {
   map.on("moveend", refreshLsoaViewport);
   updateZoomHint();
   map.on("zoom", updateZoomHint);
+  applyDeepLink();
+}
+
+/* fly to ?lat=&lon=&z= on load (used by the data explorer's "view on map" links) */
+function applyDeepLink() {
+  const q = new URLSearchParams(location.search);
+  const lat = parseFloat(q.get("lat")), lon = parseFloat(q.get("lon"));
+  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+    map.flyTo({ center: [lon, lat], zoom: parseFloat(q.get("z")) || 9.2 });
+  }
 }
 
 function empty() { return { type: "FeatureCollection", features: [] }; }
